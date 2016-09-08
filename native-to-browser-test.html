@@ -258,7 +258,8 @@
         var dataJson = JSON.parse(data);
         console.log("received ", dataJson);
         if (data.search("offer") != -1&&!initiator) {
-            createPeerConnection(peer_id);
+            if(pc==null)
+                createPeerConnection(peer_id);
             pc.setRemoteDescription(new RTCSessionDescription(dataJson), onRemoteSdpSucces, onRemoteSdpError);
             pc.createAnswer(function(sessionDescription) {
                 console.log("Create answer:", sessionDescription);
@@ -271,9 +272,14 @@
         }
         else if(data.search("answer") != -1&&initiator)
         {
+            //createPeerConnection(peer_id);
             pc.setRemoteDescription(new RTCSessionDescription(dataJson), onRemoteSdpSucces, onRemoteSdpError);
         }
         else{
+            if(pc==null) {
+                isInitiator=false;
+                createPeerConnection(peer_id);
+            }
             console.log("Adding ICE candiate ", dataJson);
             var candidate = new RTCIceCandidate({sdpMLineIndex: dataJson.sdpMLineIndex, candidate: dataJson.candidate});
             pc.addIceCandidate(candidate, aic_success_cb, aic_failure_cb);
